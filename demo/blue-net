@@ -1,0 +1,17 @@
+apiVersion: "kubernetes.com/v1"
+kind: Network
+metadata:
+  name: blue-net
+plugin: contrail
+args: '[
+       {
+                "ipam": {
+                        "type": "host-local",
+                        "subnet": "10.10.10.0/24",
+                        "routes": [
+                                { "dst": "0.0.0.0/0" }
+                        ],
+                        "gateway": "10.10.10.254"
+                }
+        }
+]'

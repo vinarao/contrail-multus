@@ -1,0 +1,60 @@
+#!/bin/sh
+echo "Service Chaining Demo" 
+
+echo "Creating a POD on SRIOV network" 
+
+cp conf/10-sriov.conf /etc/cni/net.d/10-multus.conf
+
+systemctl restart kubelet 
+
+kubectl create -f pods/ubuntu.yaml
+
+echo " Waiting for Client POD to come up" 
+sleep 45 
+
+echo "Creating a Webserver on Contrail network"
+
+cp conf/10-contrail.conf /etc/cni/net.d/10-multus.conf
+
+systemctl restart kubelet
+
+kubectl create -f pods/rc-frontend.yaml
+
+echo " Waiting for Webservers to come up" 
+sleep 45
+
+
+echo "Verify the POD"
+
+kubectl get pods -o wide 
+
+echo " Feel free to verify traffic and it wont work :)"
+sleep 20
+
+echo "Now inserting a firewall to service chain the client and web pod" 
+
+cp conf/10-multus.conf /etc/cni/net.d/10-multus.conf
+
+systemctl restart kubelet
+
+kubectl apply -f pods/csrx-deployment.yaml
+
+echo " Waiting for CSRX to boot up"
+sleep 80
+
+echo "Verify the PODs"
+
+kubectl get pods -o wide
+
+echo "Apply CSRX config"
+
+conf/configure-csrx 
+
+sleep 30
+echo "CSRX Configured" 
+
+echo "Apply the chain logic to CSRX interface in Contrail UI" 
+
+sleep 30 
+
+echo "Test the Traffic from the client to the webserver :)"

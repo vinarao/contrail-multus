@@ -1,0 +1,3 @@
+kubectl delete pod client
+kubectl delete deployment csrx
+kubectl delete rc webserver
